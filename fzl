@@ -1,0 +1,184 @@
+#!/bin/zsh
+
+
+# default values
+INSTALL_DIR="/etc/fzl"
+
+source $INSTALL_DIR/settings.env
+FZL_CONFIG_DIR=$HOME/.config/fzl
+mkdir -p $FZL_CONFIG_DIR || exit 1
+[ -e $FZL_CONFIG_DIR/settings.env ] && source $FZL_CONFIG_DIR/settings.env
+
+{ mkdir -p $SESSION_DIR && cd $SESSION_DIR; }|| exit 1
+
+
+export DISPLAY_COLUMNS
+export DISPLAY_LINES
+
+if [[ $1 == dump ]]; then
+	if [[ -f $INSTALL_DIR/$2 ]]; then
+		cp $INSTALL_DIR/$2 $FZL_CONFIG_DIR
+		exit 0
+	else
+		echo "Invalid file" >&2
+		exit 1
+	fi
+elif [[ $1 != - ]]; then
+	# Switch to terminal if exists
+	case "$OSTYPE" in
+	linux*)
+		terminal=alacritty
+		center_script="
+			window_size=\$(xdotool getwindowgeometry \$win_id | grep Geometry | awk '{print \$2}')
+			screen_width=\$(xwininfo -root | awk '/Width:/ {print \$2}')
+			screen_height=\$(xwininfo -root | awk '/Height:/ {print \$2}')
+			IFS='x' read window_width window_height <<< \$window_size
+			x_pos=\$(( (screen_width - window_width) / 2 ))
+			y_pos=\$(( (screen_height - window_height) / 2 ))
+			xdotool windowmove \$win_id \$x_pos \$y_pos
+			"
+		win_id=$(wmctrl -l | awk -v name="$name" '$4 == name { print $1 }')
+		if [[ -n $win_id ]]; then
+			curr_desktop=$(wmctrl -d | awk '/\*/ {print $1}')
+			# move to current desktop
+			wmctrl -ir "$win_id" -t $(wmctrl -d | awk '/\*/ {print $1}')
+			# bring to front
+			wmctrl -ia "$win_id"
+			# needed for consistency
+			wmctrl -s $curr_desktop
+			eval $center_script
+			exit 0
+		fi
+		;;
+	darwin*)
+    terminal=${MAC_ALACRITTY_PATH:-$terminal}
+		PATH="$MAC_PATH:$PATH"
+    check_fzl_window() {
+			command -v yabai >/dev/null 2>&1 && command -v jq >/dev/null 2>&1 || { osascript -e 'display notification "Dependencies for window management not found: new window spawned. If they are installed, consider setting MAC_PATH." with title "fzl"'; return }
+			window_id=$(yabai -m query --windows | jq -r ".[] | select(.title == \"$name\" and .app == \"Alacritty\") | .id")
+			if [[ -z "$window_id" ]]; then
+				return 1
+			fi
+
+			current_space=$(yabai -m query --spaces --space | jq -r '.index')
+			yabai -m window "$window_id" --space "$current_space"
+			yabai -m window --focus "$window_id"
+			# goal: remove yabai dependency/center
+			exit 0
+		}
+		check_fzl_window
+    ;;
+	*)
+		terminal=alacritty
+		exit 1
+		;;
+	esac
+
+	# Define terminal
+	terminal=(
+		$terminal --title $name
+		-o 'window.startup_mode="Windowed"'
+		-o "window.dimensions.lines=$DISPLAY_LINES"
+		-o "window.dimensions.columns=$DISPLAY_COLUMNS"
+		-o 'window.decorations="None"'
+		-o 'cursor.style.shape="Underline"'
+	)
+
+	# Call terminal with position + function
+	if [[ -n $xpos && -n $ypos ]]; then
+		$terminal[@] \
+			-o "window.position.x=$xpos" \
+			-o "window.position.y=$ypos" \
+			-e zsh -lc "$(realpath "${0:a}") - $@"
+	else
+		case "$OSTYPE" in
+		linux*)
+			$terminal[@] \
+				-e zsh -lc "
+						win_id=\$(wmctrl -l | awk -v name=$name '\$4 == name { print \$1 }')
+						$center_script
+						{ 
+							echo
+							echo xpos=\$x_pos
+							echo ypos=\$y_pos
+						}>> $FZL_CONFIG_DIR/settings.env
+						$(realpath "${0:a}") - $@
+					"
+			# use xdotool to center the window
+			# save the coordinates to $pos_file
+			;;
+		darwin*)
+			# Alacritty pixel positioning is wrong on mac
+			# dwidth=\$(system_profiler SPDisplaysDataType |grep Resolution | awk '{print \$2}')
+			# $terminal[@] \
+			# 	-e zsh -lc "
+      #                   pos=\$(osascript -e '
+      #                   use application \"System Events\"
+      #                   property process : a reference to (first process whose frontmost = true)
+      #                   property window : a reference to front window of my process
+      #                   property display : a reference to scroll area 1 of process \"Finder\"
+                        
+      #                   if not (my window exists) then return
+                        
+      #                   set [width, height] to size of my window
+      #                   set [screenX, screenY] to size of my display
+      #                   set newPosX to (screenX - width) div 2
+      #                   set newPosY to (screenY - height) div 2
+                        
+      #                   set position of my window to [newPosX, newPosY]
+      #                   return newPosX & newPosY & screenX
+      #                   ') &
+      #                   IFS=' ,' read xpos ypos width <<< \$pos
+      #                   echo \$(( \$xpos * $dwidth / \$width )) \$(( \$ypos * $dwidth / \$width )) > ${pos_file}
+
+      #                   $(realpath "${0:a}") - $@
+      #               "
+				$terminal[@] \
+				-e zsh -lc "$(realpath "${0:a}") - $@"
+			;;
+		esac
+	fi
+else
+	shift 1
+	# terminal reload
+	if [[ $FZL_MODE != true ]]; then
+		# dependency check
+		function {
+			(( $+commands[fzs] )) || {
+				echo "fzs not found, please install" >&2
+				return
+			}
+			if ! [[ -f ~/.local/share/fzs/fzs_plugins.zsh && -f ~/.local/share/fzs/fzs_init.zsh ]]; then
+			 echo "Requisite files not found, please run fzs to initialize."
+			 return
+			fi
+		} || read
+
+		# session setup
+		[[ -e session ]] && { rm -rf session || { echo "Failed to delete existing session $PWD/session" >&2; exit 1;} }
+		mkdir session
+
+		export FZL_CMD="$(realpath "${0:a}") - $@"
+		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir}
+		export FZL_MODE=true
+		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $INSTALL_DIR/.zshrc $FZL_ZDOTDIR/.zshrc
+
+		if [ -e $FZL_CONFIG_DIR/FZL.env ]; then
+			export FZL_ENV_FILE=$FZL_CONFIG_DIR/FZL.env
+		else
+			export FZL_ENV_FILE=$INSTALL_DIR/FZL.env
+		fi
+	fi
+
+	# shell setup
+	cd session
+	. ~/.local/share/fzs/fzs_plugins.zsh
+	. ~/.local/share/fzs/fzs_init.zsh
+	if [ -e $FZL_CONFIG_DIR/startup.zshrc ]; then
+  	source $FZL_CONFIG_DIR/startup.zshrc
+	else
+		source $INSTALL_DIR/startup.zshrc
+	fi
+
+	$@
+fi
