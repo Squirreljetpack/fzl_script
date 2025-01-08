@@ -1,9 +1,8 @@
 #!/bin/zsh
 
-
+INSTALL_DIR=${FZL_INSTALL_DIR:-"/etc/fzl"}
+SCRIPT_PATH=${0:a}
 # default values
-INSTALL_DIR="/etc/fzl"
-
 source $INSTALL_DIR/settings.env
 FZL_CONFIG_DIR=$HOME/.config/fzl
 mkdir -p $FZL_CONFIG_DIR || exit 1
@@ -49,6 +48,11 @@ elif [[ $1 != - ]]; then
 			eval $center_script
 			exit 0
 		fi
+			[[ $SAVE_POS != false ]] && save_pos_script="{ 
+				echo
+				echo xpos=\$x_pos
+				echo ypos=\$y_pos
+			}>> $FZL_CONFIG_DIR/settings.env"
 		;;
 	darwin*)
     terminal=${MAC_ALACRITTY_PATH:-$terminal}
@@ -82,14 +86,16 @@ elif [[ $1 != - ]]; then
 		-o "window.dimensions.columns=$DISPLAY_COLUMNS"
 		-o 'window.decorations="None"'
 		-o 'cursor.style.shape="Underline"'
+		${(z)ALACRITTY_OPTS}
 	)
 
 	# Call terminal with position + function
+	# note that ${0(:a)} only works when called with absolute path
 	if [[ -n $xpos && -n $ypos ]]; then
 		$terminal[@] \
 			-o "window.position.x=$xpos" \
 			-o "window.position.y=$ypos" \
-			-e zsh -lc "$(realpath "${0:a}") - $@"
+			-e zsh -lc "$SCRIPT_PATH - $@"
 	else
 		case "$OSTYPE" in
 		linux*)
@@ -97,12 +103,8 @@ elif [[ $1 != - ]]; then
 				-e zsh -lc "
 						win_id=\$(wmctrl -l | awk -v name=$name '\$4 == name { print \$1 }')
 						$center_script
-						{ 
-							echo
-							echo xpos=\$x_pos
-							echo ypos=\$y_pos
-						}>> $FZL_CONFIG_DIR/settings.env
-						$(realpath "${0:a}") - $@
+						$save_pos_script
+						$SCRIPT_PATH - $@
 					"
 			# use xdotool to center the window
 			# save the coordinates to $pos_file
@@ -131,10 +133,10 @@ elif [[ $1 != - ]]; then
       #                   IFS=' ,' read xpos ypos width <<< \$pos
       #                   echo \$(( \$xpos * $dwidth / \$width )) \$(( \$ypos * $dwidth / \$width )) > ${pos_file}
 
-      #                   $(realpath "${0:a}") - $@
+      #                   $SCRIPT_PATH - $@
       #               "
 				$terminal[@] \
-				-e zsh -lc "$(realpath "${0:a}") - $@"
+				-e zsh -lc "$SCRIPT_PATH - $@"
 			;;
 		esac
 	fi
@@ -158,7 +160,7 @@ else
 		[[ -e session ]] && { rm -rf session || { echo "Failed to delete existing session $PWD/session" >&2; exit 1;} }
 		mkdir session
 
-		export FZL_CMD="$(realpath "${0:a}") - $@"
+		export FZL_CMD="$SCRIPT_PATH - $@"
 		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir}
 		export FZL_MODE=true
 		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $INSTALL_DIR/.zshrc $FZL_ZDOTDIR/.zshrc

@@ -109,3 +109,4 @@ This file configures the behavior of the scratch terminal. The scratch terminal 
 - [ ] Custom terminal
 - [ ] completions
 - [ ] Packaging
+  - Customizable install (directory)?
