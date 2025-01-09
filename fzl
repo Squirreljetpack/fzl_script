@@ -16,14 +16,19 @@ export DISPLAY_LINES
 
 if [[ $1 == dump ]]; then
 	if [[ -f $INSTALL_DIR/$2 ]]; then
-		cp $INSTALL_DIR/$2 $FZL_CONFIG_DIR
+		cat $INSTALL_DIR/$2 > $FZL_CONFIG_DIR/$2
 		exit 0
 	else
 		echo "Invalid file" >&2
 		exit 1
 	fi
 elif [[ $1 == scratch ]]; then
-	ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} __ZDOTDIR=$ZDOTDIR exec zsh
+	# bare shell for minimal use
+	if [[ $2 == bare ]]; then
+		FZL_SCRATCH_ZSHRC=/ FZL_EMPTY_CLOSE=false FZL_MAX_COMMANDS=${3:-2} \
+		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
+	fi 
+	__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
 elif [[ $1 != - ]]; then
 	# Switch to terminal if exists
 	case "$OSTYPE" in
