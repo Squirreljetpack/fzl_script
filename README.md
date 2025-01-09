@@ -100,7 +100,7 @@ This file configures the initialization of the terminal session. It should sourc
 
 ###### start_opts.zshrc
 
-This file configures the behavior of the selection interface. The default file configures keybinds and appearances via `FZF_DEFAULT_OPTS`.
+This file configures the behavior of the selection interface. The default file configures keybinds and appearances via `FZF_DEFAULT_OPTS`. This file is sourced after start.zshrc.
 
 ###### scratch.env
 

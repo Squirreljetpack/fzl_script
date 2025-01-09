@@ -15,7 +15,7 @@ export FZF_DEFAULT_OPTS="
 	--height='100%' # default
 	--min-height=$DISPLAY_LINES
 	--preview 'lessfilter {}'
-	--prompt='' --pointer='' --marker=''
+	--prompt='' --pointer='' --marker='-'
 	--reverse
 	--no-scrollbar
 	--no-separator

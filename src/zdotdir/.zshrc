@@ -20,6 +20,7 @@ eval $(awk '
 [[ -f $FZL_SCRATCH_ZSHRC ]] && source $FZL_SCRATCH_ZSHRC || {
 	source $FZL_SCRATCH_START
 }
+source $FZL_SCRATCH_OPTS
 
 # special setup
 if [[ $FZL_EMPTY_CLOSE == true ]]; then
