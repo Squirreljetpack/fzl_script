@@ -69,6 +69,47 @@ echo 'echo Goodbye; sleep 5' > ".fzs/my-plugin/bye_gb_fare thee well"
 
 # Images
 
+###### Application launch
+
+- open/reveal
+
+###### File search
+
+- bookmarks
+- files
+
+###### Previews
+
+- plugins
+- files
+- config
+
+###### Scratchpad
+
+- monitor -> pueue -> summary
+
+###### Other
+
+- explain
+- procs + code
+- more screenshots
+  - mac system prefs
+
+- Package:
+  - utils: o, pu.add
+  - docker
+  - main
+    - find
+    - fzf
+    - fns: window/app (yabai dependency)
+    - system
+      - simple aliases
+  - misc
+    - explain
+  - monitor
+    - btop
+    - procs
+    - daemons (todo)
 
 # Examples
 

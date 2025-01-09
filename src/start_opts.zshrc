@@ -48,6 +48,6 @@ export FZF_DEFAULT_OPTS="
 	--bind 'f10:pos(10)+accept'
 	--bind 'f11:pos(11)+accept'
 	--bind 'f12:pos(12)+accept'
-	--bind 'ctrl-r:become($FZL_CMD)'
+	--bind 'ctrl-r:become($FZL__CMD)'
 	--header ''
 "

@@ -36,7 +36,7 @@ fi
 if [[ -n $FZL_RELOAD_KEY ]]; then
 	zle -N fzl-reload-widget
 	fzl-reload-widget() {
-		exec $FZL_CMD
+		exec ${(z)FZL__CMD}
 	}
 	bindkey $FZL_RELOAD_KEY fzl-reload-widget
 fi
@@ -53,16 +53,16 @@ if (($FZL_MAX_COMMANDS)); then
 	}
 	add-zsh-hook precmd __fzl_mc_precmd
 fi
-if [[ -n $FZL_FZS_CMD ]]; then
+if [[ -n $FZL_CMD ]]; then
 	setopt LOCAL_OPTIONS NO_NOTIFY NO_MONITOR
 	{
 		sleep $FZL_SEND_KEY_DELAY
 		case "$OSTYPE" in
 		linux*)
-			printf $FZL_FZS_CMD | xdotool type --delay 0 --file - >/dev/null
+			printf $FZL_CMD | xdotool type --delay 0 --file - >/dev/null
 			;;
 		darwin*)
-			osascript -e "tell application \"System Events\" to keystroke \"$FZL_FZS_CMD\"" >/dev/null
+			osascript -e "tell application \"System Events\" to keystroke \"$FZL_CMD\"" >/dev/null
 			;;
 		*) ;;
 		esac
