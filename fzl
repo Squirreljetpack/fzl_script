@@ -22,6 +22,8 @@ if [[ $1 == dump ]]; then
 		echo "Invalid file" >&2
 		exit 1
 	fi
+elif [[ $1 == scratch ]]; then
+	ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} __ZDOTDIR=$ZDOTDIR exec zsh
 elif [[ $1 != - ]]; then
 	# Switch to terminal if exists
 	case "$OSTYPE" in
@@ -165,10 +167,10 @@ else
 		export FZL_MODE=true
 		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $INSTALL_DIR/.zshrc $FZL_ZDOTDIR/.zshrc
 
-		if [ -e $FZL_CONFIG_DIR/FZL.env ]; then
-			export FZL_ENV_FILE=$FZL_CONFIG_DIR/FZL.env
+		if [ -e $FZL_CONFIG_DIR/scratch.env ]; then
+			export FZL_ENV_FILE=$FZL_CONFIG_DIR/scratch.env
 		else
-			export FZL_ENV_FILE=$INSTALL_DIR/FZL.env
+			export FZL_ENV_FILE=$INSTALL_DIR/scratch.env
 		fi
 	fi
 

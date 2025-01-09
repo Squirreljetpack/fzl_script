@@ -1,7 +1,21 @@
 #!/bin/zsh
 
 # default env values
-eval $(awk '/^FZL/ {sub(/=/, ":="); print ": ${" $0 "}"} !/^FZL/ {print $0}' $FZL_ENV_FILE)
+
+eval $(awk '
+  BEGIN {process = 1}
+  /^;/ {
+    process = 0
+  }
+  process {
+	  	sub(/=/, ":="); 
+	  	print ": ${" $0 "}"; 
+	  	next
+  }
+  !process {print $0}
+' $FZL_ENV_FILE)
+
+ZDOTDIR=$__ZDOTDIR
 
 [[ -n $FZL_SCRATCH_ZPROFILE ]] && source $FZL_SCRATCH_ZPROFILE
 [[ -n $FZL_SCRATCH_ZSHRC ]] && source $FZL_SCRATCH_ZSHRC || {

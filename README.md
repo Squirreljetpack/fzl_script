@@ -98,7 +98,7 @@ This file controls the setup of the terminal window.
 
 This file configures the behavior of the selection interface. The default file configures keybinds and appearances via `FZF_DEFAULT_OPTS`.
 
-###### FZL.env
+###### scratch.env
 
 This file configures the behavior of the scratch terminal. The scratch terminal is accessible by accepting any command with `alt-enter`, or by appropriately defined actions. It's main purpose is to auto-close the terminal after a command is run but can be further configured.
 
