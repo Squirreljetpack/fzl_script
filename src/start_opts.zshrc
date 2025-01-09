@@ -25,7 +25,7 @@ export FZF_DEFAULT_OPTS="
 	--bind '?:toggle-preview'
 	--bind 'ctrl-a:select-all'
 	--bind 'ctrl-y:execute-silent(echo {+} | ${CLIPcmd})'
-	--bind 'ctrl-v:execute(code -n -g {1}:{2})'
+	--bind 'ctrl-e:execute(code -n -g {1}:{2})'
 	--bind 'ctrl-o:execute(o {+1})'
 	--bind 'alt-u:unbind(one)'
 	--bind 'ctrl-u:cancel'

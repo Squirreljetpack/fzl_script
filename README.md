@@ -13,11 +13,11 @@ FZL sets up a floating terminal window to run fzs in non-widget mode, and provid
 # Installation
 
 ```shell
-sudo install.zsh # installs into /usr/local/etc/fzl and /usr/local/bin/fzl
+sudo install.zsh # installs into /etc/fzl and /usr/local/bin/fzl
 ```
 or
 ```shell
-INSTALL_PATH=~/.local/bin/fzl sudo install.zsh # for a user-specific installation. Copying the default configurations still requires root.
+sudo INSTALL_PATH=~/.local/bin/fzl FZS_DATA_DIR=$FZS_DATA_DIR install.zsh # for a user-specific installation with custom FZS_DATA_DIR. Writing the default configurations still requires root.
 ```
 
 
@@ -94,13 +94,19 @@ Run `fzl dump <file>` to copy the file containing the default values into the co
 
 This file controls the setup of the terminal window.
 
-###### startup.zshrc
+###### start.zshrc
+
+This file configures the initialization of the terminal session. It should source your fzs initialization files.
+
+###### start_opts.zshrc
 
 This file configures the behavior of the selection interface. The default file configures keybinds and appearances via `FZF_DEFAULT_OPTS`.
 
 ###### scratch.env
 
-This file configures the behavior of the scratch terminal. The scratch terminal is accessible by accepting any command with `alt-enter`, or by appropriately defined actions. It's main purpose is to auto-close the terminal after a command is run but can be further configured.
+This file configures the behavior of the scratch terminal.
+
+The scratch terminal is accessible by accepting any command with `alt-enter`, or by appropriately defined actions. It's main purpose is to auto-close the terminal after a command is run but can be further configured.
 
 # Todo
 

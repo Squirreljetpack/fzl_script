@@ -23,12 +23,25 @@ if [[ $1 == dump ]]; then
 		exit 1
 	fi
 elif [[ $1 == scratch ]]; then
+	if [ -e $FZL_CONFIG_DIR/scratch.env ]; then
+		export FZL_SCRATCH_ENV=$FZL_CONFIG_DIR/scratch.env
+	else
+		export FZL_SCRATCH_ENV=$INSTALL_DIR/scratch.env
+	fi
+
+	if [ -e $FZL_CONFIG_DIR/start.zshrc ]; then
+  	export FZL_SCRATCH_START=$FZL_CONFIG_DIR/start.zshrc
+	else
+		export FZL_SCRATCH_START=$INSTALL_DIR/start.zshrc
+	fi
+
 	# bare shell for minimal use
 	if [[ $2 == bare ]]; then
 		FZL_SCRATCH_ZSHRC=/ FZL_EMPTY_CLOSE=false FZL_MAX_COMMANDS=${3:-2} \
 		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
-	fi 
-	__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
+	else 
+		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
+	fi
 elif [[ $1 != - ]]; then
 	# Switch to terminal if exists
 	case "$OSTYPE" in
@@ -168,25 +181,24 @@ else
 		mkdir session
 
 		export FZL_CMD="$SCRIPT_PATH - $@"
-		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir}
 		export FZL_MODE=true
-		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $INSTALL_DIR/.zshrc $FZL_ZDOTDIR/.zshrc
 
-		if [ -e $FZL_CONFIG_DIR/scratch.env ]; then
-			export FZL_ENV_FILE=$FZL_CONFIG_DIR/scratch.env
-		else
-			export FZL_ENV_FILE=$INSTALL_DIR/scratch.env
-		fi
+		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir}
+		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $INSTALL_DIR/zdotdir/.zshrc $FZL_ZDOTDIR/.zshrc
 	fi
 
 	# shell setup
 	cd session
-	. ~/.local/share/fzs/fzs_plugins.zsh
-	. ~/.local/share/fzs/fzs_init.zsh
-	if [ -e $FZL_CONFIG_DIR/startup.zshrc ]; then
-  	source $FZL_CONFIG_DIR/startup.zshrc
+	if [ -e $FZL_CONFIG_DIR/start.zshrc ]; then
+  	source $FZL_CONFIG_DIR/start.zshrc
 	else
-		source $INSTALL_DIR/startup.zshrc
+		source $INSTALL_DIR/start.zshrc
+	fi
+
+	if [ -e $FZL_CONFIG_DIR/start_opts.zshrc ]; then
+  	source $FZL_CONFIG_DIR/start_opts.zshrc
+	else
+		source $INSTALL_DIR/start_opts.zshrc
 	fi
 
 	$@

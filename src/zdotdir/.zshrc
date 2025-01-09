@@ -14,14 +14,12 @@ eval $(awk '
 	  	next
   }
   !process {print $0}
-' $FZL_ENV_FILE)
+' $FZL_SCRATCH_ENV)
 
 [[ -f $FZL_SCRATCH_ZPROFILE ]] && source $FZL_SCRATCH_ZPROFILE
 [[ -f $FZL_SCRATCH_ZSHRC ]] && source $FZL_SCRATCH_ZSHRC || {
-	. ~/.local/share/fzs/fzs_plugins.zsh
-	. ~/.local/share/fzs/fzs_init.zsh
+	source $FZL_SCRATCH_START
 }
-
 
 # special setup
 if [[ $FZL_EMPTY_CLOSE == true ]]; then
@@ -41,7 +39,7 @@ if [[ -n $FZL_RELOAD_KEY ]]; then
 	}
 	bindkey $FZL_RELOAD_KEY fzl-reload-widget
 fi
-if (( $FZL_MAX_COMMANDS )); then
+if (($FZL_MAX_COMMANDS)); then
 	((FZL_MAX_COMMANDS -= 1))
 	autoload -Uz add-zsh-hook
 	command_counter=0
