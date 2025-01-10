@@ -23,6 +23,8 @@ export FZF_DEFAULT_OPTS="
 	--margin=0
 	--padding 1,2
 	--bind '?:toggle-preview'
+	--bind 'alt-\:toggle-wrap'
+	--bind 'ctrl-\:toggle-preview-wrap'
 	--bind 'ctrl-a:select-all'
 	--bind 'ctrl-y:execute-silent(echo {+} | ${CLIPcmd})'
 	--bind 'ctrl-e:execute(code -n -g {1}:{2})'

@@ -8,7 +8,7 @@ FZL_CONFIG_DIR=$HOME/.config/fzl
 mkdir -p $FZL_CONFIG_DIR || exit 1
 [ -e $FZL_CONFIG_DIR/settings.env ] && source $FZL_CONFIG_DIR/settings.env
 
-{ mkdir -p $SESSION_DIR && cd $SESSION_DIR; }|| exit 1
+{ mkdir -p $SESSIONS_DIR && cd $SESSIONS_DIR; }|| exit 1
 
 
 export DISPLAY_COLUMNS
@@ -185,7 +185,7 @@ else
 
 		# session setup
 		[[ -e session ]] && { rm -rf session || { echo "Failed to delete existing session $PWD/session" >&2; exit 1;} }
-		mkdir session
+		mkdir session || { echo "Failed to create session directory" >> fzl.log; exit 1; }
 
 		export FZL__CMD="$SCRIPT_PATH - $@"
 		export FZL_MODE=true
@@ -207,6 +207,8 @@ else
 	else
 		source $INSTALL_DIR/start_opts.zshrc
 	fi
+	
+	cd $START_DIR
 
 	$@
 fi
