@@ -51,12 +51,11 @@ elif [[ $1 == scratch ]]; then
 
 	# bare shell for minimal use
 	if [[ $2 == bare ]]; then
-		FZL_SCRATCH_ZSHRC=/ FZL_EMPTY_CLOSE=false FZL_MAX_COMMANDS=${3:-2} \
 		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$FZL_INSTALL_DIR/zdotdir} \
-		FZL_ESC_CLOSE=true FZL_RELOAD_KEY='^R' exec zsh
+		FZL_SCRATCH_ZSHRC=/ FZL_MAX_COMMANDS=${3:-2} FZL_BARE=true exec zsh
 	else 
 		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$FZL_INSTALL_DIR/zdotdir} \
-		FZL_ESC_CLOSE=true FZL_RELOAD_KEY='^R' exec zsh
+		FZL_BARE=false exec zsh
 	fi
 elif [[ $1 != - ]]; then
 	# Switch to terminal if exists

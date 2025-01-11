@@ -5,7 +5,7 @@
 ZDOTDIR=$__ZDOTDIR
 unset HISTFILE
 
-eval $(awk '
+eval "$(awk '
   BEGIN {process = 1}
   /^;/ {
     process = 0
@@ -16,13 +16,14 @@ eval $(awk '
 	  	next
   }
   !process {print $0}
-' $FZL_SCRATCH_ENV)
+' $FZL_SCRATCH_ENV)"
 
 [[ -f $FZL_SCRATCH_ZPROFILE ]] && source $FZL_SCRATCH_ZPROFILE
 [[ -f $FZL_SCRATCH_ZSHRC ]] && source $FZL_SCRATCH_ZSHRC || {
 	source $FZL_SCRATCH_START
 }
 source $FZL_SCRATCH_OPTS
+
 # special setup
 if [[ $FZL_EMPTY_CLOSE == true ]]; then
 	fzl-accept-line-widget() {
