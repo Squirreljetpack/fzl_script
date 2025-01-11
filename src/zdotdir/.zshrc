@@ -3,6 +3,8 @@
 # default env values
 
 ZDOTDIR=$__ZDOTDIR
+unset HISTFILE
+
 eval $(awk '
   BEGIN {process = 1}
   /^;/ {
@@ -21,7 +23,6 @@ eval $(awk '
 	source $FZL_SCRATCH_START
 }
 source $FZL_SCRATCH_OPTS
-
 # special setup
 if [[ $FZL_EMPTY_CLOSE == true ]]; then
 	fzl-accept-line-widget() {
@@ -33,13 +34,28 @@ if [[ $FZL_EMPTY_CLOSE == true ]]; then
 	zle -N fzl-accept-line-widget
 	bindkey ${FZL_ACCEPT_LINE_KEY:-'^M'} fzl-accept-line-widget # directly overwriting accept-line runs into recursion problems
 fi
-if [[ -n $FZL_RELOAD_KEY ]]; then
-	zle -N fzl-reload-widget
-	fzl-reload-widget() {
-		exec ${(z)FZL__CMD}
-	}
-	bindkey $FZL_RELOAD_KEY fzl-reload-widget
+
+
+# keybinds
+if [[ $FZL_ESC_CLOSE == true ]]; then
+		zle -N fzl-exit-widget
+		fzl-exit-widget() {
+			exit
+		}
+
+		bindkey -v
+		bindkey '^[' fzl-exit-widget
 fi
+
+# /dev/tty unhandled
+# if [[ -n $FZL_RELOAD_KEY ]]; then
+# 	zle -N fzl-reload-widget
+# 	fzl-reload-widget() {
+# 		exec fzl -
+# 	}
+# 	bindkey $FZL_RELOAD_KEY fzl-reload-widget
+# fi
+
 if (($FZL_MAX_COMMANDS)); then
 	((FZL_MAX_COMMANDS -= 1))
 	autoload -Uz add-zsh-hook

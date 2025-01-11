@@ -1,6 +1,12 @@
 #!/bin/zsh
 
-INSTALL_DIR=/etc/fzl
+if [[ $1 == '--user' ]]; then
+  INSTALL_DIR=~/.fzl
+  INSTALL_PATH=~/.local/bin/fzl
+else
+  INSTALL_DIR=/etc/fzl
+  INSTALL_PATH=/usr/local/bin/fzl
+fi
 
 check_fzs() {
   command -v "fzs" >/dev/null 2>&1 && return 0
@@ -22,6 +28,7 @@ EOF
   cp fzl $INSTALL_ROOT/usr/bin/fzl
 else
   check_fzs
+
   if ! [ -e "$INSTALL_DIR" ]; then
     mkdir -p "$INSTALL_DIR"
   fi
@@ -37,5 +44,6 @@ EOF
     exit 1
   fi
 
-  cp fzl ${INSTALL_PATH:-/usr/local/bin/fzl}
+  cp fzl ${INSTALL_PATH}
+  echo "Installed to $INSTALL_DIR and $INSTALL_PATH"
 fi

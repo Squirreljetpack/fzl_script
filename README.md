@@ -17,7 +17,7 @@ sudo install.zsh # installs into /etc/fzl and /usr/local/bin/fzl
 ```
 or
 ```shell
-sudo INSTALL_PATH=~/.local/bin/fzl FZS_DATA_DIR=$FZS_DATA_DIR install.zsh # for a user-specific installation with custom FZS_DATA_DIR. Writing the default configurations still requires root.
+sudo FZS_DATA_DIR=$FZS_DATA_DIR install.zsh --user # for a user-specific installation with custom FZS_DATA_DIR. Writing the default configurations still requires root.
 ```
 
 

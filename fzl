@@ -1,9 +1,17 @@
 #!/bin/zsh
 
-INSTALL_DIR=${FZL_INSTALL_DIR:-"/etc/fzl"}
+() {
+	[[ -e $FZL_INSTALL_DIR/zdotdir ]] && return
+	[[ -e ~/.fzl/zdotdir ]] && FZL_INSTALL_DIR=~/.fzl && return
+	[[ -e /etc/fzl/zdotdir ]] && FZL_INSTALL_DIR=/etc/fzl && return
+	echo "No install directory found" >&2 && exit 1
+}
+
+
+
 SCRIPT_PATH=${0:a}
 # default values
-source $INSTALL_DIR/settings.env
+source $FZL_INSTALL_DIR/settings.env
 FZL_CONFIG_DIR=$HOME/.config/fzl
 mkdir -p $FZL_CONFIG_DIR || exit 1
 [ -e $FZL_CONFIG_DIR/settings.env ] && source $FZL_CONFIG_DIR/settings.env
@@ -15,8 +23,8 @@ export DISPLAY_COLUMNS
 export DISPLAY_LINES
 
 if [[ $1 == dump ]]; then
-	if [[ -f $INSTALL_DIR/$2 ]]; then
-		cat $INSTALL_DIR/$2 > $FZL_CONFIG_DIR/$2
+	if [[ -f $FZL_INSTALL_DIR/$2 ]]; then
+		cat $FZL_INSTALL_DIR/$2 > $FZL_CONFIG_DIR/$2
 		exit 0
 	else
 		echo "Invalid file" >&2
@@ -26,28 +34,29 @@ elif [[ $1 == scratch ]]; then
 	if [ -e $FZL_CONFIG_DIR/scratch.env ]; then
 		export FZL_SCRATCH_ENV=$FZL_CONFIG_DIR/scratch.env
 	else
-		export FZL_SCRATCH_ENV=$INSTALL_DIR/scratch.env
+		export FZL_SCRATCH_ENV=$FZL_INSTALL_DIR/scratch.env
 	fi
 
 	if [ -e $FZL_CONFIG_DIR/start.zshrc ]; then
   	export FZL_SCRATCH_START=$FZL_CONFIG_DIR/start.zshrc
 	else
-		export FZL_SCRATCH_START=$INSTALL_DIR/start.zshrc
+		export FZL_SCRATCH_START=$FZL_INSTALL_DIR/start.zshrc
 	fi
-
 
 	if [ -e $FZL_CONFIG_DIR/start_opts.zshrc ]; then
   	export FZL_SCRATCH_OPTS=$FZL_CONFIG_DIR/start_opts.zshrc
 	else
-		export FZL_SCRATCH_OPTS=$INSTALL_DIR/start_opts.zshrc
+		export FZL_SCRATCH_OPTS=$FZL_INSTALL_DIR/start_opts.zshrc
 	fi
 
 	# bare shell for minimal use
 	if [[ $2 == bare ]]; then
 		FZL_SCRATCH_ZSHRC=/ FZL_EMPTY_CLOSE=false FZL_MAX_COMMANDS=${3:-2} \
-		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
+		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$FZL_INSTALL_DIR/zdotdir} \
+		FZL_ESC_CLOSE=true FZL_RELOAD_KEY='^R' exec zsh
 	else 
-		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir} exec zsh
+		__ZDOTDIR=$ZDOTDIR ZDOTDIR=${FZL_ZDOTDIR:-$FZL_INSTALL_DIR/zdotdir} \
+		FZL_ESC_CLOSE=true FZL_RELOAD_KEY='^R' exec zsh
 	fi
 elif [[ $1 != - ]]; then
 	# Switch to terminal if exists
@@ -190,8 +199,9 @@ else
 		export FZL__CMD="$SCRIPT_PATH - $@"
 		export FZL_MODE=true
 
-		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$INSTALL_DIR/zdotdir}
-		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $INSTALL_DIR/zdotdir/.zshrc $FZL_ZDOTDIR/.zshrc
+		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$FZL_INSTALL_DIR/zdotdir}
+		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $FZL_INSTALL_DIR/zdotdir/.zshrc $FZL_ZDOTDIR/.zshrc
+		redirect=false
 	fi
 
 	# shell setup
@@ -199,16 +209,17 @@ else
 	if [ -e $FZL_CONFIG_DIR/start.zshrc ]; then
   	source $FZL_CONFIG_DIR/start.zshrc
 	else
-		source $INSTALL_DIR/start.zshrc
+		source $FZL_INSTALL_DIR/start.zshrc
 	fi
 
 	if [ -e $FZL_CONFIG_DIR/start_opts.zshrc ]; then
   	source $FZL_CONFIG_DIR/start_opts.zshrc
 	else
-		source $INSTALL_DIR/start_opts.zshrc
+		source $FZL_INSTALL_DIR/start_opts.zshrc
 	fi
 	
 	cd $START_DIR
+	[[ $# -eq 0 ]] && set -- ${${=FZL__CMD}:2}
 
-	$@
+	[[ redirect == false ]] && $@ || $@ > /dev/tty
 fi

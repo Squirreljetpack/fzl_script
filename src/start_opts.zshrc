@@ -53,3 +53,4 @@ export FZF_DEFAULT_OPTS="
 	--bind 'ctrl-r:become($FZL__CMD)'
 	--header ''
 "
+setopt NO_NOMATCH
