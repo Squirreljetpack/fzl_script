@@ -200,7 +200,6 @@ else
 
 		export FZL_ZDOTDIR=${FZL_ZDOTDIR:-$FZL_INSTALL_DIR/zdotdir}
 		[ -e $FZL_ZDOTDIR/.zshrc ] || cp $FZL_INSTALL_DIR/zdotdir/.zshrc $FZL_ZDOTDIR/.zshrc
-		redirect=false
 	fi
 
 	# shell setup
@@ -220,5 +219,5 @@ else
 	cd $START_DIR
 	[[ $# -eq 0 ]] && set -- ${${=FZL__CMD}:2}
 
-	[[ redirect == false ]] && $@ || $@ > /dev/tty
+	$@ > /dev/tty # this is so that $(fzf become) still works
 fi
